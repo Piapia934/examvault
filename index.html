@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ExamVault — Study Notes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0e0f14;
+      --surface: #16181f;
+      --surface2: #1e2029;
+      --border: #2a2d3a;
+      --accent: #c8f135;
+      --accent2: #7c5cfc;
+      --pin: #ff9f43;
+      --text: #eef0f8;
+      --muted: #6b7080;
+      --danger: #ff5c5c;
+      --radius: 14px;
+      --card-radius: 18px;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Animated background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 10% 0%, rgba(124,92,252,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 90% 100%, rgba(200,241,53,0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── HEADER ─── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(14,15,20,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 clamp(16px, 4vw, 40px);
+      height: 64px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.3rem;
+      color: var(--text);
+      flex-shrink: 0;
+      letter-spacing: -0.02em;
+    }
+    .logo span { color: var(--accent); }
+
+    .search-wrap {
+      flex: 1;
+      max-width: 440px;
+      position: relative;
+    }
+    .search-wrap svg {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+    #searchInput {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px 10px 40px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #searchInput::placeholder { color: var(--muted); }
+    #searchInput:focus { border-color: var(--accent2); }
+
+    .header-actions { margin-left: auto; display: flex; gap: 10px; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 18px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #0e0f14;
+      font-weight: 700;
+    }
+    .btn-primary:hover { background: #d8ff45; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(200,241,53,0.3); }
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: var(--accent2); }
+    .btn-danger { background: rgba(255,92,92,0.15); color: var(--danger); border: 1px solid rgba(255,92,92,0.3); }
+    .btn-danger:hover { background: rgba(255,92,92,0.25); }
+
+    /* ─── MAIN LAYOUT ─── */
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: clamp(20px, 4vw, 40px) clamp(16px, 4vw, 40px);
+    }
+
+    /* ─── STATS BAR ─── */
+    .stats-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    .stat-pill {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: 6px 16px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .stat-pill b { color: var(--text); font-weight: 600; }
+    .stat-pill.pinned b { color: var(--pin); }
+    .stat-pill.subjects b { color: var(--accent2); }
+
+    /* ─── FILTERS ─── */
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .filter-label { font-size: 0.8rem; color: var(--muted); margin-right: 4px; }
+    .chip {
+      padding: 6px 14px;
+      border-radius: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .chip:hover { border-color: var(--accent2); color: var(--text); }
+    .chip.active { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+    #subjectFilter { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* ─── SECTION HEADING ─── */
+    .section-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .section-head h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .section-head .line { flex: 1; height: 1px; background: var(--border); }
+
+    /* ─── GRID ─── */
+    .notes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 18px;
+      margin-bottom: 40px;
+    }
+
+    /* ─── NOTE CARD ─── */
+    .note-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      transition: all 0.25s;
+      animation: cardIn 0.35s ease both;
+      cursor: default;
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .note-card:hover {
+      border-color: var(--accent2);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(124,92,252,0.15);
+    }
+    .note-card.pinned {
+      border-color: rgba(255,159,67,0.4);
+      background: linear-gradient(135deg, var(--surface), rgba(255,159,67,0.05));
+    }
+    .note-card.pinned:hover { border-color: var(--pin); box-shadow: 0 8px 32px rgba(255,159,67,0.15); }
+
+    .pin-badge {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--pin);
+      background: rgba(255,159,67,0.15);
+      border: 1px solid rgba(255,159,67,0.3);
+      border-radius: 6px;
+      padding: 2px 8px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .card-subject {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--accent2);
+    }
+    .subject-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+    }
+
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.3;
+      color: var(--text);
+      padding-right: 50px;
+    }
+
+    .card-body {
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.6;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+    .card-date { font-size: 0.76rem; color: var(--muted); }
+    .card-actions { display: flex; gap: 6px; }
+    .icon-btn {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--muted);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .icon-btn:hover { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+    .icon-btn.pin-btn:hover { background: var(--pin); border-color: var(--pin); }
+    .icon-btn.del-btn:hover { background: var(--danger); border-color: var(--danger); }
+    .icon-btn.active { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+    .icon-btn.pin-active { background: var(--pin); border-color: var(--pin); color: #fff; }
+
+    /* ─── EMPTY STATE ─── */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--muted);
+    }
+    .empty-state .emoji { font-size: 3rem; margin-bottom: 12px; }
+    .empty-state h3 { font-family: 'Syne', sans-serif; font-size: 1.2rem; color: var(--text); margin-bottom: 8px; }
+    .empty-state p { font-size: 0.9rem; }
+
+    /* ─── MODAL ─── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(6px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      width: 100%;
+      max-width: 580px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 32px;
+      transform: translateY(20px) scale(0.97);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .modal-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 800;
+    }
+    .close-btn {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--muted);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .close-btn:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
+
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 8px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.93rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus { border-color: var(--accent2); }
+    .form-group textarea { resize: vertical; min-height: 140px; line-height: 1.6; }
+    .form-group select option { background: var(--surface); }
+
+    .subject-input-row {
+      display: flex;
+      gap: 8px;
+    }
+    .subject-input-row input { flex: 1; }
+    .subject-input-row .btn { flex-shrink: 0; padding: 12px 14px; }
+
+    .pin-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pin-toggle:hover { border-color: var(--pin); }
+    .pin-toggle.pinned { border-color: var(--pin); background: rgba(255,159,67,0.08); }
+    .pin-toggle span { font-size: 0.9rem; }
+    .toggle-switch {
+      width: 40px; height: 22px;
+      background: var(--border);
+      border-radius: 11px;
+      position: relative;
+      margin-left: auto;
+      transition: background 0.2s;
+    }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      top: 3px; left: 3px;
+      transition: left 0.2s;
+    }
+    .pinned .toggle-switch { background: var(--pin); }
+    .pinned .toggle-switch::after { left: 21px; }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 24px;
+      justify-content: flex-end;
+    }
+
+    /* ─── VIEW MODAL ─── */
+    .view-subject-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--accent2);
+      background: rgba(124,92,252,0.1);
+      border: 1px solid rgba(124,92,252,0.25);
+      border-radius: 8px;
+      padding: 4px 12px;
+      margin-bottom: 12px;
+    }
+    .view-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+    .view-body {
+      font-size: 0.93rem;
+      line-height: 1.8;
+      color: #c5c9d8;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .view-date { font-size: 0.8rem; color: var(--muted); margin-top: 20px; }
+
+    /* ─── DELETE CONFIRM ─── */
+    .confirm-modal { max-width: 400px; text-align: center; }
+    .confirm-modal .danger-icon {
+      width: 56px; height: 56px;
+      border-radius: 16px;
+      background: rgba(255,92,92,0.1);
+      border: 1px solid rgba(255,92,92,0.3);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 1.6rem;
+    }
+    .confirm-modal h3 { font-family: 'Syne', sans-serif; font-size: 1.2rem; margin-bottom: 8px; }
+    .confirm-modal p { font-size: 0.88rem; color: var(--muted); }
+    .confirm-modal .modal-actions { justify-content: center; }
+
+    /* ─── TOAST ─── */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: 12px 24px;
+      font-size: 0.875rem;
+      color: var(--text);
+      z-index: 999;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      pointer-events: none;
+      opacity: 0;
+      white-space: nowrap;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 600px) {
+      header { height: auto; padding: 12px 16px; flex-wrap: wrap; gap: 10px; }
+      .logo { order: 0; }
+      .header-actions { order: 1; }
+      .search-wrap { order: 2; width: 100%; max-width: 100%; }
+      .notes-grid { grid-template-columns: 1fr; }
+      .modal { padding: 22px; }
+      .modal-actions { flex-direction: column-reverse; }
+      .modal-actions .btn { width: 100%; justify-content: center; }
+    }
+    @media (max-width: 400px) {
+      .btn-primary span { display: none; }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<!-- ─── HEADER ─── -->
+<header>
+  <div class="logo">Exam<span>Vault</span></div>
+  <div class="search-wrap">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="searchInput" placeholder="Search notes, topics, subjects…" />
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-primary" onclick="openCreate()">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      <span>New Note</span>
+    </button>
+  </div>
+</header>
+
+<!-- ─── MAIN ─── -->
+<main>
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-pill">📝 <b id="totalCount">0</b> total notes</div>
+    <div class="stat-pill pinned">📌 <b id="pinnedCount">0</b> pinned</div>
+    <div class="stat-pill subjects">📚 <b id="subjectCount">0</b> subjects</div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-row">
+    <span class="filter-label">Filter:</span>
+    <button class="chip active" data-filter="all" onclick="setFilter('all',this)">All</button>
+    <button class="chip" data-filter="pinned" onclick="setFilter('pinned',this)">📌 Pinned</button>
+    <div id="subjectFilter"></div>
+  </div>
+
+  <!-- Pinned section -->
+  <div id="pinnedSection" style="display:none">
+    <div class="section-head">
+      <h2>📌 Pinned</h2>
+      <div class="line"></div>
+    </div>
+    <div class="notes-grid" id="pinnedGrid"></div>
+  </div>
+
+  <!-- All Notes section -->
+  <div class="section-head">
+    <h2>All Notes</h2>
+    <div class="line"></div>
+  </div>
+  <div class="notes-grid" id="notesGrid"></div>
+</main>
+
+<!-- ─── CREATE/EDIT MODAL ─── -->
+<div class="modal-overlay" id="editOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">New Note</div>
+      <button class="close-btn" onclick="closeModal('editOverlay')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="form-group">
+      <label>Subject Name</label>
+      <div class="subject-input-row">
+        <select id="subjectSelect">
+          <option value="">— Select a subject —</option>
+        </select>
+        <button class="btn btn-ghost" onclick="toggleNewSubject()" title="Add new subject">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="form-group" id="newSubjectGroup" style="display:none">
+      <label>New Subject</label>
+      <div class="subject-input-row">
+        <input type="text" id="newSubjectInput" placeholder="e.g. Mathematics, Biology…" />
+        <button class="btn btn-primary" onclick="addSubject()">Add</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Topic / Title</label>
+      <input type="text" id="noteTitle" placeholder="e.g. Chapter 5 — Cell Division" />
+    </div>
+
+    <div class="form-group">
+      <label>Notes Content</label>
+      <textarea id="noteBody" placeholder="Write your exam notes here…"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Options</label>
+      <div class="pin-toggle" id="pinToggle" onclick="togglePin()">
+        <span>📌</span>
+        <span>Pin this note</span>
+        <div class="toggle-switch"></div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('editOverlay')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNote()">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save Note
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── VIEW MODAL ─── -->
+<div class="modal-overlay" id="viewOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-ghost" onclick="editFromView()" style="font-size:0.82rem;padding:7px 14px">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Edit
+        </button>
+      </div>
+      <button class="close-btn" onclick="closeModal('viewOverlay')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div id="viewSubject" class="view-subject-tag"></div>
+    <div id="viewTitle" class="view-title"></div>
+    <div id="viewBody" class="view-body"></div>
+    <div id="viewDate" class="view-date"></div>
+  </div>
+</div>
+
+<!-- ─── DELETE CONFIRM MODAL ─── -->
+<div class="modal-overlay" id="deleteOverlay">
+  <div class="modal confirm-modal">
+    <div class="danger-icon">🗑️</div>
+    <h3>Delete this note?</h3>
+    <p>This action cannot be undone. The note will be permanently removed.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('deleteOverlay')">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── TOAST ─── -->
+<div id="toast"></div>
+
+<script>
+// ─── STATE ───
+let notes = JSON.parse(localStorage.getItem('examvault_notes') || '[]');
+let subjects = JSON.parse(localStorage.getItem('examvault_subjects') || '["Mathematics","Science","English","History","Physics","Chemistry"]');
+let editingId = null;
+let deletingId = null;
+let viewingId = null;
+let isPinned = false;
+let currentFilter = 'all';
+let activeSubjectFilter = null;
+
+// ─── INIT ───
+function init() {
+  populateSubjectSelect();
+  renderSubjectFilters();
+  renderNotes();
+  updateStats();
+  document.getElementById('searchInput').addEventListener('input', renderNotes);
+}
+
+// ─── SAVE ───
+function save() {
+  localStorage.setItem('examvault_notes', JSON.stringify(notes));
+  localStorage.setItem('examvault_subjects', JSON.stringify(subjects));
+}
+
+// ─── SUBJECT ───
+function populateSubjectSelect() {
+  const sel = document.getElementById('subjectSelect');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— Select a subject —</option>';
+  subjects.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s; opt.textContent = s;
+    if (s === cur) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+function renderSubjectFilters() {
+  const wrap = document.getElementById('subjectFilter');
+  wrap.innerHTML = '';
+  subjects.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'chip' + (activeSubjectFilter === s ? ' active' : '');
+    btn.textContent = s;
+    btn.onclick = () => {
+      if (activeSubjectFilter === s) {
+        activeSubjectFilter = null;
+        setFilter(currentFilter === 'pinned' ? 'pinned' : 'all', document.querySelector('.chip[data-filter="' + (currentFilter === 'pinned' ? 'pinned' : 'all') + '"]'));
+      } else {
+        activeSubjectFilter = s;
+        document.querySelectorAll('.chip[data-filter]').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        renderNotes();
+      }
+    };
+    wrap.appendChild(btn);
+  });
+}
+
+function toggleNewSubject() {
+  const g = document.getElementById('newSubjectGroup');
+  g.style.display = g.style.display === 'none' ? 'block' : 'none';
+  if (g.style.display === 'block') document.getElementById('newSubjectInput').focus();
+}
+
+function addSubject() {
+  const input = document.getElementById('newSubjectInput');
+  const val = input.value.trim();
+  if (!val) return;
+  if (subjects.includes(val)) { showToast('⚠️ Subject already exists'); return; }
+  subjects.push(val);
+  save();
+  populateSubjectSelect();
+  document.getElementById('subjectSelect').value = val;
+  input.value = '';
+  document.getElementById('newSubjectGroup').style.display = 'none';
+  renderSubjectFilters();
+  showToast('📚 Subject added!');
+}
+
+// ─── FILTER ───
+function setFilter(f, el) {
+  currentFilter = f;
+  activeSubjectFilter = null;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderNotes();
+}
+
+// ─── RENDER ───
+function renderNotes() {
+  const query = document.getElementById('searchInput').value.toLowerCase();
+  let filtered = notes.filter(n => {
+    const matchSearch = !query ||
+      n.title.toLowerCase().includes(query) ||
+      n.body.toLowerCase().includes(query) ||
+      n.subject.toLowerCase().includes(query);
+    const matchPin = currentFilter !== 'pinned' || n.pinned;
+    const matchSubject = !activeSubjectFilter || n.subject === activeSubjectFilter;
+    return matchSearch && matchPin && matchSubject;
+  });
+
+  const pinned = filtered.filter(n => n.pinned);
+  const regular = filtered.filter(n => !n.pinned);
+
+  const pinnedSection = document.getElementById('pinnedSection');
+  pinnedSection.style.display = (pinned.length && currentFilter !== 'pinned') ? 'block' : 'none';
+  document.getElementById('pinnedGrid').innerHTML = pinned.map(noteCard).join('');
+  document.getElementById('notesGrid').innerHTML = regular.length
+    ? regular.map(noteCard).join('')
+    : `<div class="empty-state">
+        <div class="emoji">${query ? '🔍' : '📝'}</div>
+        <h3>${query ? 'No results found' : 'No notes yet'}</h3>
+        <p>${query ? 'Try a different search term.' : 'Click "New Note" to create your first exam note!'}</p>
+      </div>`;
+  updateStats();
+}
+
+function noteCard(n) {
+  const date = new Date(n.updatedAt).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  return `<div class="note-card ${n.pinned ? 'pinned' : ''}" data-id="${n.id}">
+    ${n.pinned ? '<div class="pin-badge">📌 Pinned</div>' : ''}
+    <div class="card-subject"><span class="subject-dot"></span>${escHtml(n.subject || 'General')}</div>
+    <div class="card-title">${escHtml(n.title)}</div>
+    <div class="card-body">${escHtml(n.body)}</div>
+    <div class="card-footer">
+      <div class="card-date">${date}</div>
+      <div class="card-actions">
+        <button class="icon-btn" title="View" onclick="viewNote('${n.id}')">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+        <button class="icon-btn ${n.pinned ? 'pin-active' : 'pin-btn'}" title="${n.pinned ? 'Unpin' : 'Pin'}" onclick="togglePinNote('${n.id}')">
+          <svg width="14" height="14" fill="${n.pinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </button>
+        <button class="icon-btn" title="Edit" onclick="openEdit('${n.id}')">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button class="icon-btn del-btn" title="Delete" onclick="deleteNote('${n.id}')">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function escHtml(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── STATS ───
+function updateStats() {
+  document.getElementById('totalCount').textContent = notes.length;
+  document.getElementById('pinnedCount').textContent = notes.filter(n => n.pinned).length;
+  document.getElementById('subjectCount').textContent = subjects.length;
+}
+
+// ─── CREATE/EDIT ───
+function openCreate() {
+  editingId = null;
+  isPinned = false;
+  document.getElementById('modalTitle').textContent = 'New Note';
+  document.getElementById('noteTitle').value = '';
+  document.getElementById('noteBody').value = '';
+  document.getElementById('subjectSelect').value = '';
+  document.getElementById('pinToggle').classList.remove('pinned');
+  document.getElementById('newSubjectGroup').style.display = 'none';
+  openModal('editOverlay');
+}
+
+function openEdit(id) {
+  const n = notes.find(n => n.id === id);
+  if (!n) return;
+  editingId = id;
+  isPinned = n.pinned;
+  document.getElementById('modalTitle').textContent = 'Edit Note';
+  document.getElementById('noteTitle').value = n.title;
+  document.getElementById('noteBody').value = n.body;
+  populateSubjectSelect();
+  document.getElementById('subjectSelect').value = n.subject;
+  document.getElementById('pinToggle').classList.toggle('pinned', n.pinned);
+  document.getElementById('newSubjectGroup').style.display = 'none';
+  closeModal('viewOverlay');
+  openModal('editOverlay');
+}
+
+function editFromView() {
+  if (viewingId) { closeModal('viewOverlay'); openEdit(viewingId); }
+}
+
+function togglePin() {
+  isPinned = !isPinned;
+  document.getElementById('pinToggle').classList.toggle('pinned', isPinned);
+}
+
+function saveNote() {
+  const title = document.getElementById('noteTitle').value.trim();
+  const body = document.getElementById('noteBody').value.trim();
+  const subject = document.getElementById('subjectSelect').value;
+  if (!title) { showToast('⚠️ Please add a title!'); document.getElementById('noteTitle').focus(); return; }
+  if (!body) { showToast('⚠️ Notes content is empty!'); document.getElementById('noteBody').focus(); return; }
+
+  if (editingId) {
+    const i = notes.findIndex(n => n.id === editingId);
+    notes[i] = { ...notes[i], title, body, subject, pinned: isPinned, updatedAt: Date.now() };
+    showToast('✅ Note updated!');
+  } else {
+    notes.unshift({ id: crypto.randomUUID(), title, body, subject, pinned: isPinned, createdAt: Date.now(), updatedAt: Date.now() });
+    showToast('✅ Note created!');
+  }
+  save();
+  closeModal('editOverlay');
+  renderNotes();
+}
+
+// ─── VIEW ───
+function viewNote(id) {
+  const n = notes.find(n => n.id === id);
+  if (!n) return;
+  viewingId = id;
+  const date = new Date(n.updatedAt).toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+  document.getElementById('viewSubject').innerHTML = `<span class="subject-dot" style="background:var(--accent2)"></span>${escHtml(n.subject || 'General')}${n.pinned ? ' &nbsp;📌' : ''}`;
+  document.getElementById('viewTitle').textContent = n.title;
+  document.getElementById('viewBody').textContent = n.body;
+  document.getElementById('viewDate').textContent = 'Last updated ' + date;
+  openModal('viewOverlay');
+}
+
+// ─── DELETE ───
+function deleteNote(id) {
+  deletingId = id;
+  openModal('deleteOverlay');
+}
+function confirmDelete() {
+  notes = notes.filter(n => n.id !== deletingId);
+  save();
+  closeModal('deleteOverlay');
+  closeModal('viewOverlay');
+  renderNotes();
+  showToast('🗑️ Note deleted');
+}
+
+// ─── PIN ───
+function togglePinNote(id) {
+  const n = notes.find(n => n.id === id);
+  if (!n) return;
+  n.pinned = !n.pinned;
+  n.updatedAt = Date.now();
+  save();
+  renderNotes();
+  showToast(n.pinned ? '📌 Note pinned!' : '📌 Note unpinned');
+}
+
+// ─── MODALS ───
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(overlay.id); });
+});
+
+// ─── TOAST ───
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timeout);
+  t._timeout = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ─── KEYBOARD ───
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m => closeModal(m.id));
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    document.getElementById('searchInput').focus();
+  }
+});
+
+init();
+</script>
+</body>
+</html>
