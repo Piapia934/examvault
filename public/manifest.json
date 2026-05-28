@@ -3,6 +3,7 @@
   "short_name": "ExamVault",
   "start_url": "/",
   "display": "standalone",
+  "display_override": ["standalone"],
   "background_color": "#0e0f14",
   "theme_color": "#0e0f14",
   "icons": [

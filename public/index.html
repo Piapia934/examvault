@@ -984,45 +984,21 @@ document.addEventListener('keydown', e => {
 init();
 </script>
 <script>
-// ─── PWA INSTALL ───
-let deferredPrompt;
+const filterButtons = document.querySelectorAll('.filter-btn');
 
-const installBtn = document.getElementById('installBtn');
+filterButtons.forEach(button => {
+  button.addEventListener('click', () => {
 
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
+    // remove active class from all buttons
+    filterButtons.forEach(btn => {
+      btn.classList.remove('active');
+    });
 
-  installBtn.style.display = 'inline-flex';
-});
+    // add active class to clicked button
+    button.classList.add('active');
 
-installBtn.addEventListener('click', async () => {
-  if (!deferredPrompt) return;
-
-  deferredPrompt.prompt();
-
-  const { outcome } = await deferredPrompt.userChoice;
-
-  if (outcome === 'accepted') {
-    showToast('✅ ExamVault Installed!');
-  }
-
-  deferredPrompt = null;
-  installBtn.style.display = 'none';
-});
-
-// ─── SERVICE WORKER ───
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
-      .then(() => {
-        console.log('Service Worker Registered');
-      })
-      .catch((error) => {
-        console.log('Service Worker Error:', error);
-      });
   });
-}
+});
 </script>
 
 </body>
