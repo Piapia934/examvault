@@ -701,6 +701,38 @@
 <div id="toast"></div>
 
 <script>
+// ─── INSTALL APP ───
+let deferredPrompt;
+const installBtn = document.getElementById('installBtn');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+
+  installBtn.style.display = 'inline-flex';
+});
+
+installBtn.addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+
+  deferredPrompt.prompt();
+
+  const { outcome } = await deferredPrompt.userChoice;
+
+  if (outcome === 'accepted') {
+    installBtn.style.display = 'none';
+  }
+
+  deferredPrompt = null;
+});
+
+// ─── REGISTER SERVICE WORKER ───
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js');
+  });
+}
+
 // ─── STATE ───
 let notes = JSON.parse(localStorage.getItem('examvault_notes') || '[]');
 let subjects = JSON.parse(localStorage.getItem('examvault_subjects') || '["Mathematics","Science","English","History","Physics","Chemistry"]');
@@ -717,7 +749,9 @@ function init() {
   renderSubjectFilters();
   renderNotes();
   updateStats();
-  document.getElementById('searchInput').addEventListener('input', renderNotes);
+
+  document.getElementById('searchInput')
+    .addEventListener('input', renderNotes);
 }
 
 // ─── SAVE ───
@@ -726,279 +760,217 @@ function save() {
   localStorage.setItem('examvault_subjects', JSON.stringify(subjects));
 }
 
-// ─── SUBJECT ───
+// ─── SUBJECTS ───
 function populateSubjectSelect() {
   const sel = document.getElementById('subjectSelect');
   const cur = sel.value;
+
   sel.innerHTML = '<option value="">— Select a subject —</option>';
+
   subjects.forEach(s => {
     const opt = document.createElement('option');
-    opt.value = s; opt.textContent = s;
+    opt.value = s;
+    opt.textContent = s;
+
     if (s === cur) opt.selected = true;
+
     sel.appendChild(opt);
   });
 }
 
 function renderSubjectFilters() {
   const wrap = document.getElementById('subjectFilter');
+
   wrap.innerHTML = '';
+
   subjects.forEach(s => {
     const btn = document.createElement('button');
+
     btn.className = 'chip' + (activeSubjectFilter === s ? ' active' : '');
+
     btn.textContent = s;
+
     btn.onclick = () => {
+
       if (activeSubjectFilter === s) {
+
         activeSubjectFilter = null;
-        setFilter(currentFilter === 'pinned' ? 'pinned' : 'all', document.querySelector('.chip[data-filter="' + (currentFilter === 'pinned' ? 'pinned' : 'all') + '"]'));
+
+        setFilter(
+          currentFilter === 'pinned' ? 'pinned' : 'all',
+          document.querySelector(
+            '.chip[data-filter="' +
+            (currentFilter === 'pinned' ? 'pinned' : 'all') +
+            '"]'
+          )
+        );
+
       } else {
+
         activeSubjectFilter = s;
-        document.querySelectorAll('.chip[data-filter]').forEach(c => c.classList.remove('active'));
+
+        // REMOVE ACTIVE FROM ALL
+        document.querySelectorAll('.chip')
+          .forEach(c => c.classList.remove('active'));
+
+        // ADD ACTIVE ONLY TO CLICKED
         btn.classList.add('active');
+
         renderNotes();
       }
     };
+
     wrap.appendChild(btn);
   });
 }
 
-function toggleNewSubject() {
-  const g = document.getElementById('newSubjectGroup');
-  g.style.display = g.style.display === 'none' ? 'block' : 'none';
-  if (g.style.display === 'block') document.getElementById('newSubjectInput').focus();
-}
-
-function addSubject() {
-  const input = document.getElementById('newSubjectInput');
-  const val = input.value.trim();
-  if (!val) return;
-  if (subjects.includes(val)) { showToast('⚠️ Subject already exists'); return; }
-  subjects.push(val);
-  save();
-  populateSubjectSelect();
-  document.getElementById('subjectSelect').value = val;
-  input.value = '';
-  document.getElementById('newSubjectGroup').style.display = 'none';
-  renderSubjectFilters();
-  showToast('📚 Subject added!');
-}
-
 // ─── FILTER ───
 function setFilter(f, el) {
+
   currentFilter = f;
   activeSubjectFilter = null;
-  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+
+  document.querySelectorAll('.chip')
+    .forEach(c => c.classList.remove('active'));
+
   if (el) el.classList.add('active');
+
   renderNotes();
 }
 
-// ─── RENDER ───
+// ─── RENDER NOTES ───
 function renderNotes() {
-  const query = document.getElementById('searchInput').value.toLowerCase();
+
+  const query = document.getElementById('searchInput')
+    .value
+    .toLowerCase();
+
   let filtered = notes.filter(n => {
-    const matchSearch = !query ||
+
+    const matchSearch =
+      !query ||
       n.title.toLowerCase().includes(query) ||
       n.body.toLowerCase().includes(query) ||
       n.subject.toLowerCase().includes(query);
-    const matchPin = currentFilter !== 'pinned' || n.pinned;
-    const matchSubject = !activeSubjectFilter || n.subject === activeSubjectFilter;
+
+    const matchPin =
+      currentFilter !== 'pinned' || n.pinned;
+
+    const matchSubject =
+      !activeSubjectFilter || n.subject === activeSubjectFilter;
+
     return matchSearch && matchPin && matchSubject;
   });
 
   const pinned = filtered.filter(n => n.pinned);
+
   const regular = filtered.filter(n => !n.pinned);
 
   const pinnedSection = document.getElementById('pinnedSection');
-  pinnedSection.style.display = (pinned.length && currentFilter !== 'pinned') ? 'block' : 'none';
-  document.getElementById('pinnedGrid').innerHTML = pinned.map(noteCard).join('');
-  document.getElementById('notesGrid').innerHTML = regular.length
-    ? regular.map(noteCard).join('')
-    : `<div class="empty-state">
-        <div class="emoji">${query ? '🔍' : '📝'}</div>
-        <h3>${query ? 'No results found' : 'No notes yet'}</h3>
-        <p>${query ? 'Try a different search term.' : 'Click "New Note" to create your first exam note!'}</p>
-      </div>`;
+
+  pinnedSection.style.display =
+    (pinned.length && currentFilter !== 'pinned')
+      ? 'block'
+      : 'none';
+
+  document.getElementById('pinnedGrid').innerHTML =
+    pinned.map(noteCard).join('');
+
+  document.getElementById('notesGrid').innerHTML =
+    regular.length
+      ? regular.map(noteCard).join('')
+      : `
+      <div class="empty-state">
+        <div class="emoji">📝</div>
+        <h3>No notes found</h3>
+        <p>Create your first note.</p>
+      </div>
+    `;
+
   updateStats();
 }
 
+// ─── NOTE CARD ───
 function noteCard(n) {
-  const date = new Date(n.updatedAt).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
-  return `<div class="note-card ${n.pinned ? 'pinned' : ''}" data-id="${n.id}">
+
+  const date = new Date(n.updatedAt)
+    .toLocaleDateString('en-US', {
+      month:'short',
+      day:'numeric',
+      year:'numeric'
+    });
+
+  return `
+  <div class="note-card ${n.pinned ? 'pinned' : ''}">
     ${n.pinned ? '<div class="pin-badge">📌 Pinned</div>' : ''}
-    <div class="card-subject"><span class="subject-dot"></span>${escHtml(n.subject || 'General')}</div>
-    <div class="card-title">${escHtml(n.title)}</div>
-    <div class="card-body">${escHtml(n.body)}</div>
-    <div class="card-footer">
-      <div class="card-date">${date}</div>
-      <div class="card-actions">
-        <button class="icon-btn" title="View" onclick="viewNote('${n.id}')">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-        </button>
-        <button class="icon-btn ${n.pinned ? 'pin-active' : 'pin-btn'}" title="${n.pinned ? 'Unpin' : 'Pin'}" onclick="togglePinNote('${n.id}')">
-          <svg width="14" height="14" fill="${n.pinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        </button>
-        <button class="icon-btn" title="Edit" onclick="openEdit('${n.id}')">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        </button>
-        <button class="icon-btn del-btn" title="Delete" onclick="deleteNote('${n.id}')">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-        </button>
-      </div>
+
+    <div class="card-subject">
+      <span class="subject-dot"></span>
+      ${escHtml(n.subject || 'General')}
     </div>
-  </div>`;
+
+    <div class="card-title">
+      ${escHtml(n.title)}
+    </div>
+
+    <div class="card-body">
+      ${escHtml(n.body)}
+    </div>
+
+    <div class="card-footer">
+
+      <div class="card-date">${date}</div>
+
+      <div class="card-actions">
+
+        <button class="icon-btn"
+          onclick="viewNote('${n.id}')">
+          👁️
+        </button>
+
+        <button class="icon-btn ${n.pinned ? 'pin-active' : ''}"
+          onclick="togglePinNote('${n.id}')">
+          📌
+        </button>
+
+        <button class="icon-btn"
+          onclick="openEdit('${n.id}')">
+          ✏️
+        </button>
+
+        <button class="icon-btn del-btn"
+          onclick="deleteNote('${n.id}')">
+          🗑️
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+  `;
 }
 
+// ─── ESCAPE HTML ───
 function escHtml(s) {
-  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return (s || '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
 }
 
 // ─── STATS ───
 function updateStats() {
   document.getElementById('totalCount').textContent = notes.length;
-  document.getElementById('pinnedCount').textContent = notes.filter(n => n.pinned).length;
-  document.getElementById('subjectCount').textContent = subjects.length;
+
+  document.getElementById('pinnedCount').textContent =
+    notes.filter(n => n.pinned).length;
+
+  document.getElementById('subjectCount').textContent =
+    subjects.length;
 }
-
-// ─── CREATE/EDIT ───
-function openCreate() {
-  editingId = null;
-  isPinned = false;
-  document.getElementById('modalTitle').textContent = 'New Note';
-  document.getElementById('noteTitle').value = '';
-  document.getElementById('noteBody').value = '';
-  document.getElementById('subjectSelect').value = '';
-  document.getElementById('pinToggle').classList.remove('pinned');
-  document.getElementById('newSubjectGroup').style.display = 'none';
-  openModal('editOverlay');
-}
-
-function openEdit(id) {
-  const n = notes.find(n => n.id === id);
-  if (!n) return;
-  editingId = id;
-  isPinned = n.pinned;
-  document.getElementById('modalTitle').textContent = 'Edit Note';
-  document.getElementById('noteTitle').value = n.title;
-  document.getElementById('noteBody').value = n.body;
-  populateSubjectSelect();
-  document.getElementById('subjectSelect').value = n.subject;
-  document.getElementById('pinToggle').classList.toggle('pinned', n.pinned);
-  document.getElementById('newSubjectGroup').style.display = 'none';
-  closeModal('viewOverlay');
-  openModal('editOverlay');
-}
-
-function editFromView() {
-  if (viewingId) { closeModal('viewOverlay'); openEdit(viewingId); }
-}
-
-function togglePin() {
-  isPinned = !isPinned;
-  document.getElementById('pinToggle').classList.toggle('pinned', isPinned);
-}
-
-function saveNote() {
-  const title = document.getElementById('noteTitle').value.trim();
-  const body = document.getElementById('noteBody').value.trim();
-  const subject = document.getElementById('subjectSelect').value;
-  if (!title) { showToast('⚠️ Please add a title!'); document.getElementById('noteTitle').focus(); return; }
-  if (!body) { showToast('⚠️ Notes content is empty!'); document.getElementById('noteBody').focus(); return; }
-
-  if (editingId) {
-    const i = notes.findIndex(n => n.id === editingId);
-    notes[i] = { ...notes[i], title, body, subject, pinned: isPinned, updatedAt: Date.now() };
-    showToast('✅ Note updated!');
-  } else {
-    notes.unshift({ id: crypto.randomUUID(), title, body, subject, pinned: isPinned, createdAt: Date.now(), updatedAt: Date.now() });
-    showToast('✅ Note created!');
-  }
-  save();
-  closeModal('editOverlay');
-  renderNotes();
-}
-
-// ─── VIEW ───
-function viewNote(id) {
-  const n = notes.find(n => n.id === id);
-  if (!n) return;
-  viewingId = id;
-  const date = new Date(n.updatedAt).toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
-  document.getElementById('viewSubject').innerHTML = `<span class="subject-dot" style="background:var(--accent2)"></span>${escHtml(n.subject || 'General')}${n.pinned ? ' &nbsp;📌' : ''}`;
-  document.getElementById('viewTitle').textContent = n.title;
-  document.getElementById('viewBody').textContent = n.body;
-  document.getElementById('viewDate').textContent = 'Last updated ' + date;
-  openModal('viewOverlay');
-}
-
-// ─── DELETE ───
-function deleteNote(id) {
-  deletingId = id;
-  openModal('deleteOverlay');
-}
-function confirmDelete() {
-  notes = notes.filter(n => n.id !== deletingId);
-  save();
-  closeModal('deleteOverlay');
-  closeModal('viewOverlay');
-  renderNotes();
-  showToast('🗑️ Note deleted');
-}
-
-// ─── PIN ───
-function togglePinNote(id) {
-  const n = notes.find(n => n.id === id);
-  if (!n) return;
-  n.pinned = !n.pinned;
-  n.updatedAt = Date.now();
-  save();
-  renderNotes();
-  showToast(n.pinned ? '📌 Note pinned!' : '📌 Note unpinned');
-}
-
-// ─── MODALS ───
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(overlay.id); });
-});
-
-// ─── TOAST ───
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(t._timeout);
-  t._timeout = setTimeout(() => t.classList.remove('show'), 2800);
-}
-
-// ─── KEYBOARD ───
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    document.querySelectorAll('.modal-overlay.open').forEach(m => closeModal(m.id));
-  }
-  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-    e.preventDefault();
-    document.getElementById('searchInput').focus();
-  }
-});
 
 init();
-</script>
-<script>
-const filterButtons = document.querySelectorAll('.filter-btn');
-
-filterButtons.forEach(button => {
-  button.addEventListener('click', () => {
-
-    // remove active class from all buttons
-    filterButtons.forEach(btn => {
-      btn.classList.remove('active');
-    });
-
-    // add active class to clicked button
-    button.classList.add('active');
-
-  });
-});
 </script>
 
 </body>
