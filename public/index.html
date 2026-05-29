@@ -522,14 +522,7 @@
           Keep your must-review notes always at the top
         </div>
       </div>
-      <div class="splash-feat">
-        <div class="feat-icon o">💾</div>
-        <div class="feat-text">
-          <strong>Works Offline</strong>
-          All notes saved locally — no account needed
-        </div>
-      </div>
-    </div>
+  
 
     <button class="splash-btn" onclick="enterApp()">
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
@@ -537,7 +530,7 @@
     </button>
 
     <div class="splash-pwa">
-      <span>Install for offline access</span>
+      <span>Install the app for a better experience</span>
       <button id="splashInstallBtn" onclick="triggerInstall()">Install App ↓</button>
     </div>
 
@@ -715,12 +708,7 @@ function triggerInstall() {
   });
 }
 
-/* ── Service worker ── */
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js').catch(() => {});
-  });
-}
+
 
 /* ── Splash ── */
 function enterApp() {
