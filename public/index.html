@@ -5,26 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ExamVault — Study Notes</title>
 
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#000000">
-<link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#000000">
+  <link rel="apple-touch-icon" href="/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0e0f14;
-      --surface: #16181f;
-      --surface2: #1e2029;
-      --border: #2a2d3a;
-      --accent: #c8f135;
-      --accent2: #7c5cfc;
-      --pin: #ff9f43;
-      --text: #eef0f8;
-      --muted: #6b7080;
-      --danger: #ff5c5c;
-      --radius: 14px;
+      --bg:          #0e0f14;
+      --surface:     #16181f;
+      --surface2:    #1e2029;
+      --border:      #2a2d3a;
+      --accent:      #c8f135;
+      --accent2:     #7c5cfc;
+      --pin:         #ff9f43;
+      --text:        #eef0f8;
+      --muted:       #6b7080;
+      --danger:      #ff5c5c;
       --card-radius: 18px;
     }
 
@@ -36,19 +36,216 @@
       overflow-x: hidden;
     }
 
-    /* Animated background */
     body::before {
       content: '';
       position: fixed;
       inset: 0;
       background:
-        radial-gradient(ellipse 60% 50% at 10% 0%, rgba(124,92,252,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 50% at 10% 0%,  rgba(124,92,252,0.12) 0%, transparent 70%),
         radial-gradient(ellipse 50% 40% at 90% 100%, rgba(200,241,53,0.08) 0%, transparent 70%);
       pointer-events: none;
       z-index: 0;
     }
 
-    /* ─── HEADER ─── */
+    /* ═══════════════════════════════════════
+       INSTALL SPLASH
+    ═══════════════════════════════════════ */
+    #installSplash {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    #installSplash::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%,  rgba(124,92,252,0.20) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 90%,  rgba(200,241,53,0.12) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    #installSplash.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(1.04);
+    }
+
+    .splash-inner {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 40px 32px;
+      max-width: 440px;
+      width: 100%;
+    }
+
+    .splash-icon {
+      width: 88px;
+      height: 88px;
+      background: linear-gradient(135deg, #1e2029, #2a2d3a);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 28px;
+      position: relative;
+      animation: iconFloat 3s ease-in-out infinite;
+    }
+
+    .splash-icon::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 25px;
+      background: linear-gradient(135deg, rgba(124,92,252,0.45), rgba(200,241,53,0.25));
+      z-index: -1;
+      filter: blur(10px);
+    }
+
+    @keyframes iconFloat {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-8px); }
+    }
+
+    .splash-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 2.4rem;
+      letter-spacing: -0.03em;
+      margin-bottom: 10px;
+      line-height: 1;
+    }
+    .splash-logo span { color: var(--accent); }
+
+    .splash-tagline {
+      font-size: 1rem;
+      color: var(--muted);
+      margin-bottom: 40px;
+      line-height: 1.6;
+      max-width: 280px;
+    }
+
+    .splash-features {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      margin-bottom: 36px;
+    }
+
+    .splash-feat {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 0.855rem;
+      color: var(--muted);
+      text-align: left;
+      animation: featIn 0.5s ease both;
+    }
+    .splash-feat:nth-child(1) { animation-delay: 0.05s; }
+    .splash-feat:nth-child(2) { animation-delay: 0.15s; }
+    .splash-feat:nth-child(3) { animation-delay: 0.25s; }
+
+    @keyframes featIn {
+      from { opacity: 0; transform: translateX(-14px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .feat-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .feat-icon.g { background: rgba(200,241,53,0.12); }
+    .feat-icon.p { background: rgba(124,92,252,0.15); }
+    .feat-icon.o { background: rgba(255,159,67,0.15); }
+
+    .feat-text strong { display: block; color: var(--text); font-weight: 600; font-size: 0.88rem; margin-bottom: 2px; }
+
+    .splash-btn {
+      width: 100%;
+      padding: 16px;
+      background: var(--accent);
+      color: #0e0f14;
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      letter-spacing: -0.01em;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      animation: btnPulse 2.2s ease-in-out infinite;
+    }
+
+    @keyframes btnPulse {
+      0%, 100% { box-shadow: 0 0 0 0   rgba(200,241,53,0);    }
+      50%       { box-shadow: 0 0 0 14px rgba(200,241,53,0.10); }
+    }
+
+    .splash-btn:hover  { background: #d8ff45; transform: translateY(-2px); }
+    .splash-btn:active { transform: translateY(0) scale(0.98); }
+
+    .splash-pwa {
+      margin-top: 18px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #splashInstallBtn {
+      display: none;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--accent2);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      padding: 4px 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    #splashInstallBtn:hover { border-color: var(--accent2); background: rgba(124,92,252,0.1); }
+
+    /* ═══════════════════════════════════════
+       APP WRAPPER
+    ═══════════════════════════════════════ */
+    #appWrapper {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease 0.1s;
+    }
+    #appWrapper.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* ═══════════════════════════════════════
+       HEADER
+    ═══════════════════════════════════════ */
     header {
       position: sticky;
       top: 0;
@@ -63,29 +260,11 @@
       gap: 16px;
     }
 
-    .logo {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 1.3rem;
-      color: var(--text);
-      flex-shrink: 0;
-      letter-spacing: -0.02em;
-    }
+    .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.3rem; color: var(--text); flex-shrink: 0; letter-spacing: -0.02em; }
     .logo span { color: var(--accent); }
 
-    .search-wrap {
-      flex: 1;
-      max-width: 440px;
-      position: relative;
-    }
-    .search-wrap svg {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--muted);
-      pointer-events: none;
-    }
+    .search-wrap { flex: 1; max-width: 440px; position: relative; }
+    .search-wrap svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
     #searchInput {
       width: 100%;
       background: var(--surface2);
@@ -104,307 +283,140 @@
     .header-actions { margin-left: auto; display: flex; gap: 10px; }
 
     .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 9px 18px;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.88rem;
-      font-weight: 500;
-      transition: all 0.2s;
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 18px; border-radius: 10px; border: none;
+      cursor: pointer; font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem; font-weight: 500; transition: all 0.2s;
     }
-    .btn-primary {
-      background: var(--accent);
-      color: #0e0f14;
-      font-weight: 700;
-    }
+    .btn-primary { background: var(--accent); color: #0e0f14; font-weight: 700; }
     .btn-primary:hover { background: #d8ff45; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(200,241,53,0.3); }
-    .btn-ghost {
-      background: var(--surface2);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
+    .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
     .btn-ghost:hover { border-color: var(--accent2); }
     .btn-danger { background: rgba(255,92,92,0.15); color: var(--danger); border: 1px solid rgba(255,92,92,0.3); }
     .btn-danger:hover { background: rgba(255,92,92,0.25); }
 
-    /* ─── MAIN LAYOUT ─── */
+    /* ═══════════════════════════════════════
+       MAIN
+    ═══════════════════════════════════════ */
     main {
-      position: relative;
-      z-index: 1;
-      max-width: 1280px;
-      margin: 0 auto;
+      position: relative; z-index: 1;
+      max-width: 1280px; margin: 0 auto;
       padding: clamp(20px, 4vw, 40px) clamp(16px, 4vw, 40px);
     }
 
-    /* ─── STATS BAR ─── */
-    .stats-bar {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 28px;
-      flex-wrap: wrap;
-    }
+    /* Stats */
+    .stats-bar { display: flex; gap: 12px; margin-bottom: 28px; flex-wrap: wrap; }
     .stat-pill {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 50px;
-      padding: 6px 16px;
-      font-size: 0.82rem;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 50px; padding: 6px 16px;
+      font-size: 0.82rem; color: var(--muted);
+      display: flex; align-items: center; gap: 6px;
     }
     .stat-pill b { color: var(--text); font-weight: 600; }
-    .stat-pill.pinned b { color: var(--pin); }
+    .stat-pill.pinned  b { color: var(--pin); }
     .stat-pill.subjects b { color: var(--accent2); }
 
-    /* ─── FILTERS ─── */
-    .filter-row {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 28px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
+    /* Filters */
+    .filter-row { display: flex; gap: 8px; margin-bottom: 28px; flex-wrap: wrap; align-items: center; }
     .filter-label { font-size: 0.8rem; color: var(--muted); margin-right: 4px; }
     .chip {
-      padding: 6px 14px;
-      border-radius: 8px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 0.82rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: 'DM Sans', sans-serif;
+      padding: 6px 14px; border-radius: 8px;
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--muted); font-size: 0.82rem; cursor: pointer;
+      transition: all 0.2s; font-family: 'DM Sans', sans-serif;
     }
     .chip:hover { border-color: var(--accent2); color: var(--text); }
     .chip.active { background: var(--accent2); border-color: var(--accent2); color: #fff; }
     #subjectFilter { display: flex; gap: 8px; flex-wrap: wrap; }
 
-    /* ─── SECTION HEADING ─── */
-    .section-head {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 18px;
-    }
-    .section-head h2 {
-      font-family: 'Syne', sans-serif;
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--muted);
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
+    /* Section heading */
+    .section-head { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+    .section-head h2 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
     .section-head .line { flex: 1; height: 1px; background: var(--border); }
 
-    /* ─── GRID ─── */
-    .notes-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 18px;
-      margin-bottom: 40px;
-    }
+    /* Grid */
+    .notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; margin-bottom: 40px; }
 
-    /* ─── NOTE CARD ─── */
+    /* ═══════════════════════════════════════
+       NOTE CARD
+    ═══════════════════════════════════════ */
     .note-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--card-radius);
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      position: relative;
-      transition: all 0.25s;
-      animation: cardIn 0.35s ease both;
-      cursor: default;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--card-radius); padding: 20px;
+      display: flex; flex-direction: column; gap: 12px;
+      position: relative; transition: all 0.25s;
+      animation: cardIn 0.35s ease both; cursor: default;
     }
     @keyframes cardIn {
       from { opacity: 0; transform: translateY(12px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-    .note-card:hover {
-      border-color: var(--accent2);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 32px rgba(124,92,252,0.15);
-    }
-    .note-card.pinned {
-      border-color: rgba(255,159,67,0.4);
-      background: linear-gradient(135deg, var(--surface), rgba(255,159,67,0.05));
-    }
+    .note-card:hover { border-color: var(--accent2); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(124,92,252,0.15); }
+    .note-card.pinned { border-color: rgba(255,159,67,0.4); background: linear-gradient(135deg, var(--surface), rgba(255,159,67,0.05)); }
     .note-card.pinned:hover { border-color: var(--pin); box-shadow: 0 8px 32px rgba(255,159,67,0.15); }
 
-    .pin-badge {
-      position: absolute;
-      top: 14px;
-      right: 14px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--pin);
-      background: rgba(255,159,67,0.15);
-      border: 1px solid rgba(255,159,67,0.3);
-      border-radius: 6px;
-      padding: 2px 8px;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
+    .pin-badge { position: absolute; top: 14px; right: 14px; font-size: 0.72rem; font-weight: 700; color: var(--pin); background: rgba(255,159,67,0.15); border: 1px solid rgba(255,159,67,0.3); border-radius: 6px; padding: 2px 8px; letter-spacing: 0.05em; text-transform: uppercase; }
 
-    .card-subject {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      color: var(--accent2);
-    }
-    .subject-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: currentColor;
-      flex-shrink: 0;
-    }
+    .card-subject { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent2); }
+    .subject-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+    .card-title { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; line-height: 1.3; color: var(--text); padding-right: 50px; }
+    .card-body { font-size: 0.875rem; color: var(--muted); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 
-    .card-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.05rem;
-      font-weight: 700;
-      line-height: 1.3;
-      color: var(--text);
-      padding-right: 50px;
-    }
-
-    .card-body {
-      font-size: 0.875rem;
-      color: var(--muted);
-      line-height: 1.6;
-      display: -webkit-box;
-      -webkit-line-clamp: 4;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .card-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: auto;
-      padding-top: 12px;
-      border-top: 1px solid var(--border);
-    }
+    .card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border); }
     .card-date { font-size: 0.76rem; color: var(--muted); }
     .card-actions { display: flex; gap: 6px; }
-    .icon-btn {
-      width: 32px; height: 32px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--surface2);
-      color: var(--muted);
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: all 0.2s;
-    }
-    .icon-btn:hover { background: var(--accent2); border-color: var(--accent2); color: #fff; }
-    .icon-btn.pin-btn:hover { background: var(--pin); border-color: var(--pin); }
-    .icon-btn.del-btn:hover { background: var(--danger); border-color: var(--danger); }
-    .icon-btn.active { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+
+    .icon-btn { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-size: 0.85rem; }
+    .icon-btn:hover     { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+    .icon-btn.pin-btn:hover  { background: var(--pin);    border-color: var(--pin); }
+    .icon-btn.del-btn:hover  { background: var(--danger); border-color: var(--danger); }
     .icon-btn.pin-active { background: var(--pin); border-color: var(--pin); color: #fff; }
 
-    /* ─── EMPTY STATE ─── */
-    .empty-state {
-      grid-column: 1 / -1;
-      text-align: center;
-      padding: 80px 20px;
-      color: var(--muted);
-    }
+    /* Empty state */
+    .empty-state { grid-column: 1 / -1; text-align: center; padding: 80px 20px; color: var(--muted); }
     .empty-state .emoji { font-size: 3rem; margin-bottom: 12px; }
     .empty-state h3 { font-family: 'Syne', sans-serif; font-size: 1.2rem; color: var(--text); margin-bottom: 8px; }
     .empty-state p { font-size: 0.9rem; }
 
-    /* ─── MODAL ─── */
+    /* ═══════════════════════════════════════
+       MODALS
+    ═══════════════════════════════════════ */
     .modal-overlay {
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
       background: rgba(0,0,0,0.7);
       backdrop-filter: blur(6px);
       z-index: 200;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       padding: 20px;
-      opacity: 0;
-      pointer-events: none;
+      opacity: 0; pointer-events: none;
       transition: opacity 0.25s;
     }
     .modal-overlay.open { opacity: 1; pointer-events: all; }
 
     .modal {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 22px;
-      width: 100%;
-      max-width: 580px;
-      max-height: 90vh;
-      overflow-y: auto;
-      padding: 32px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 22px; width: 100%; max-width: 580px;
+      max-height: 90vh; overflow-y: auto; padding: 32px;
       transform: translateY(20px) scale(0.97);
       transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .modal-overlay.open .modal { transform: translateY(0) scale(1); }
 
-    .modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 24px;
-    }
-    .modal-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.3rem;
-      font-weight: 800;
-    }
-    .close-btn {
-      width: 36px; height: 36px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: var(--surface2);
-      color: var(--muted);
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: all 0.2s;
-    }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .modal-title { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; }
+
+    .close-btn { width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface2); color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
     .close-btn:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
 
     .form-group { margin-bottom: 18px; }
-    .form-group label {
-      display: block;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--muted);
-      margin-bottom: 8px;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
+    .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--muted); margin-bottom: 8px; letter-spacing: 0.04em; text-transform: uppercase; }
     .form-group input,
     .form-group select,
     .form-group textarea {
-      width: 100%;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px 14px;
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.93rem;
-      outline: none;
-      transition: border-color 0.2s;
+      width: 100%; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 14px; color: var(--text);
+      font-family: 'DM Sans', sans-serif; font-size: 0.93rem;
+      outline: none; transition: border-color 0.2s;
     }
     .form-group input:focus,
     .form-group select:focus,
@@ -412,123 +424,48 @@
     .form-group textarea { resize: vertical; min-height: 140px; line-height: 1.6; }
     .form-group select option { background: var(--surface); }
 
-    .subject-input-row {
-      display: flex;
-      gap: 8px;
-    }
+    .subject-input-row { display: flex; gap: 8px; }
     .subject-input-row input { flex: 1; }
     .subject-input-row .btn { flex-shrink: 0; padding: 12px 14px; }
 
-    .pin-toggle {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 16px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
+    .pin-toggle { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.2s; user-select: none; }
     .pin-toggle:hover { border-color: var(--pin); }
     .pin-toggle.pinned { border-color: var(--pin); background: rgba(255,159,67,0.08); }
     .pin-toggle span { font-size: 0.9rem; }
-    .toggle-switch {
-      width: 40px; height: 22px;
-      background: var(--border);
-      border-radius: 11px;
-      position: relative;
-      margin-left: auto;
-      transition: background 0.2s;
-    }
-    .toggle-switch::after {
-      content: '';
-      position: absolute;
-      width: 16px; height: 16px;
-      border-radius: 50%;
-      background: #fff;
-      top: 3px; left: 3px;
-      transition: left 0.2s;
-    }
+    .toggle-switch { width: 40px; height: 22px; background: var(--border); border-radius: 11px; position: relative; margin-left: auto; transition: background 0.2s; flex-shrink: 0; }
+    .toggle-switch::after { content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%; background: #fff; top: 3px; left: 3px; transition: left 0.2s; }
     .pinned .toggle-switch { background: var(--pin); }
     .pinned .toggle-switch::after { left: 21px; }
 
-    .modal-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 24px;
-      justify-content: flex-end;
-    }
+    .modal-actions { display: flex; gap: 10px; margin-top: 24px; justify-content: flex-end; }
 
-    /* ─── VIEW MODAL ─── */
-    .view-subject-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--accent2);
-      background: rgba(124,92,252,0.1);
-      border: 1px solid rgba(124,92,252,0.25);
-      border-radius: 8px;
-      padding: 4px 12px;
-      margin-bottom: 12px;
-    }
-    .view-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.6rem;
-      font-weight: 800;
-      line-height: 1.2;
-      margin-bottom: 16px;
-    }
-    .view-body {
-      font-size: 0.93rem;
-      line-height: 1.8;
-      color: #c5c9d8;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
+    /* View modal */
+    .view-subject-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; color: var(--accent2); background: rgba(124,92,252,0.1); border: 1px solid rgba(124,92,252,0.25); border-radius: 8px; padding: 4px 12px; margin-bottom: 12px; }
+    .view-title { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; line-height: 1.2; margin-bottom: 16px; }
+    .view-body { font-size: 0.93rem; line-height: 1.8; color: #c5c9d8; white-space: pre-wrap; word-break: break-word; }
     .view-date { font-size: 0.8rem; color: var(--muted); margin-top: 20px; }
 
-    /* ─── DELETE CONFIRM ─── */
+    /* Delete confirm */
     .confirm-modal { max-width: 400px; text-align: center; }
-    .confirm-modal .danger-icon {
-      width: 56px; height: 56px;
-      border-radius: 16px;
-      background: rgba(255,92,92,0.1);
-      border: 1px solid rgba(255,92,92,0.3);
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 16px;
-      font-size: 1.6rem;
-    }
+    .confirm-modal .danger-icon { width: 56px; height: 56px; border-radius: 16px; background: rgba(255,92,92,0.1); border: 1px solid rgba(255,92,92,0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 1.6rem; }
     .confirm-modal h3 { font-family: 'Syne', sans-serif; font-size: 1.2rem; margin-bottom: 8px; }
     .confirm-modal p { font-size: 0.88rem; color: var(--muted); }
     .confirm-modal .modal-actions { justify-content: center; }
 
-    /* ─── TOAST ─── */
+    /* Toast */
     #toast {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
+      position: fixed; bottom: 24px; left: 50%;
       transform: translateX(-50%) translateY(80px);
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 50px;
-      padding: 12px 24px;
-      font-size: 0.875rem;
-      color: var(--text);
-      z-index: 999;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 50px; padding: 12px 24px;
+      font-size: 0.875rem; color: var(--text);
+      z-index: 9998; pointer-events: none; opacity: 0;
+      white-space: nowrap; display: flex; align-items: center; gap: 8px;
       transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      pointer-events: none;
-      opacity: 0;
-      white-space: nowrap;
     }
     #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-    /* ─── RESPONSIVE ─── */
+    /* Responsive */
     @media (max-width: 600px) {
       header { height: auto; padding: 12px 16px; flex-wrap: wrap; gap: 10px; }
       .logo { order: 0; }
@@ -538,12 +475,13 @@
       .modal { padding: 22px; }
       .modal-actions { flex-direction: column-reverse; }
       .modal-actions .btn { width: 100%; justify-content: center; }
+      .splash-inner { padding: 28px 20px; }
+      .splash-logo { font-size: 1.9rem; }
     }
     @media (max-width: 400px) {
       .btn-primary span { display: none; }
     }
 
-    /* Scrollbar */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
@@ -551,60 +489,111 @@
 </head>
 <body>
 
-<!-- ─── HEADER ─── -->
-<header>
-  <div class="logo">Exam<span>Vault</span></div>
-  <div class="search-wrap">
-    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    <input type="text" id="searchInput" placeholder="Search notes, topics, subjects…" />
-  </div>
-<div class="header-actions">
+<!-- ═══════════════════════════════════════
+     INSTALL SPLASH
+═══════════════════════════════════════ -->
+<div id="installSplash">
+  <div class="splash-inner">
 
-  <button class="btn btn-ghost" id="installBtn" style="display:none;">
-    Install App
-  </button>
-    <button class="btn btn-primary" onclick="openCreate()">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-      <span>New Note</span>
-    </button>
-  </div>
-</header>
-
-<!-- ─── MAIN ─── -->
-<main>
-  <!-- Stats -->
-  <div class="stats-bar">
-    <div class="stat-pill">📝 <b id="totalCount">0</b> total notes</div>
-    <div class="stat-pill pinned">📌 <b id="pinnedCount">0</b> pinned</div>
-    <div class="stat-pill subjects">📚 <b id="subjectCount">0</b> subjects</div>
-  </div>
-
-  <!-- Filters -->
-  <div class="filter-row">
-    <span class="filter-label">Filter:</span>
-    <button class="chip active" data-filter="all" onclick="setFilter('all',this)">All</button>
-    <button class="chip" data-filter="pinned" onclick="setFilter('pinned',this)">📌 Pinned</button>
-    <div id="subjectFilter"></div>
-  </div>
-
-  <!-- Pinned section -->
-  <div id="pinnedSection" style="display:none">
-    <div class="section-head">
-      <h2>📌 Pinned</h2>
-      <div class="line"></div>
+    <div class="splash-icon">
+      <svg width="46" height="46" fill="none" viewBox="0 0 46 46">
+        <rect x="7" y="4" width="28" height="36" rx="5" fill="rgba(124,92,252,0.15)" stroke="rgba(124,92,252,0.4)" stroke-width="1.5"/>
+        <path d="M13 15h20M13 21h20M13 27h12" stroke="#c8f135" stroke-width="2.2" stroke-linecap="round"/>
+        <circle cx="34" cy="34" r="8" fill="#c8f135"/>
+        <path d="M30.5 34l2.5 2.5 5-5" stroke="#0e0f14" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
     </div>
-    <div class="notes-grid" id="pinnedGrid"></div>
-  </div>
 
-  <!-- All Notes section -->
-  <div class="section-head">
-    <h2>All Notes</h2>
-    <div class="line"></div>
-  </div>
-  <div class="notes-grid" id="notesGrid"></div>
-</main>
+    <div class="splash-logo">Exam<span>Vault</span></div>
+    <p class="splash-tagline">Your smart study notes hub — organize, pin, and ace every subject.</p>
 
-<!-- ─── CREATE/EDIT MODAL ─── -->
+    <div class="splash-features">
+      <div class="splash-feat">
+        <div class="feat-icon g">📝</div>
+        <div class="feat-text">
+          <strong>Create &amp; Edit Notes</strong>
+          Rich notes organized by subject with instant search
+        </div>
+      </div>
+      <div class="splash-feat">
+        <div class="feat-icon p">📌</div>
+        <div class="feat-text">
+          <strong>Pin Important Topics</strong>
+          Keep your must-review notes always at the top
+        </div>
+      </div>
+      <div class="splash-feat">
+        <div class="feat-icon o">💾</div>
+        <div class="feat-text">
+          <strong>Works Offline</strong>
+          All notes saved locally — no account needed
+        </div>
+      </div>
+    </div>
+
+    <button class="splash-btn" onclick="enterApp()">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      Get Started
+    </button>
+
+    <div class="splash-pwa">
+      <span>Install for offline access</span>
+      <button id="splashInstallBtn" onclick="triggerInstall()">Install App ↓</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     APP
+═══════════════════════════════════════ -->
+<div id="appWrapper">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">Exam<span>Vault</span></div>
+    <div class="search-wrap">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="searchInput" placeholder="Search notes, topics, subjects…" />
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-ghost" id="headerInstallBtn" style="display:none" onclick="triggerInstall()">Install App</button>
+      <button class="btn btn-primary" onclick="openCreate()">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        <span>New Note</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main>
+    <div class="stats-bar">
+      <div class="stat-pill">📝 <b id="totalCount">0</b> total notes</div>
+      <div class="stat-pill pinned">📌 <b id="pinnedCount">0</b> pinned</div>
+      <div class="stat-pill subjects">📚 <b id="subjectCount">0</b> subjects</div>
+    </div>
+
+    <div class="filter-row">
+      <span class="filter-label">Filter:</span>
+      <button class="chip active" data-filter="all"    onclick="setFilter('all',this)">All</button>
+      <button class="chip"        data-filter="pinned" onclick="setFilter('pinned',this)">📌 Pinned</button>
+      <div id="subjectFilter"></div>
+    </div>
+
+    <div id="pinnedSection" style="display:none">
+      <div class="section-head"><h2>📌 Pinned</h2><div class="line"></div></div>
+      <div class="notes-grid" id="pinnedGrid"></div>
+    </div>
+
+    <div class="section-head"><h2>All Notes</h2><div class="line"></div></div>
+    <div class="notes-grid" id="notesGrid"></div>
+  </main>
+
+</div><!-- /appWrapper -->
+
+<!-- ═══════════════════════════════════════
+     CREATE / EDIT MODAL
+═══════════════════════════════════════ -->
 <div class="modal-overlay" id="editOverlay">
   <div class="modal">
     <div class="modal-header">
@@ -615,11 +604,9 @@
     </div>
 
     <div class="form-group">
-      <label>Subject Name</label>
+      <label>Subject</label>
       <div class="subject-input-row">
-        <select id="subjectSelect">
-          <option value="">— Select a subject —</option>
-        </select>
+        <select id="subjectSelect"><option value="">— Select a subject —</option></select>
         <button class="btn btn-ghost" onclick="toggleNewSubject()" title="Add new subject">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
         </button>
@@ -663,315 +650,381 @@
   </div>
 </div>
 
-<!-- ─── VIEW MODAL ─── -->
+<!-- ═══════════════════════════════════════
+     VIEW MODAL
+═══════════════════════════════════════ -->
 <div class="modal-overlay" id="viewOverlay">
   <div class="modal">
     <div class="modal-header">
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-ghost" onclick="editFromView()" style="font-size:0.82rem;padding:7px 14px">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          Edit
-        </button>
-      </div>
+      <button class="btn btn-ghost" onclick="editFromView()" style="font-size:0.82rem;padding:7px 14px">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit
+      </button>
       <button class="close-btn" onclick="closeModal('viewOverlay')">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
       </button>
     </div>
     <div id="viewSubject" class="view-subject-tag"></div>
-    <div id="viewTitle" class="view-title"></div>
-    <div id="viewBody" class="view-body"></div>
-    <div id="viewDate" class="view-date"></div>
+    <div id="viewTitle"   class="view-title"></div>
+    <div id="viewBody"    class="view-body"></div>
+    <div id="viewDate"    class="view-date"></div>
   </div>
 </div>
 
-<!-- ─── DELETE CONFIRM MODAL ─── -->
+<!-- ═══════════════════════════════════════
+     DELETE CONFIRM MODAL
+═══════════════════════════════════════ -->
 <div class="modal-overlay" id="deleteOverlay">
   <div class="modal confirm-modal">
     <div class="danger-icon">🗑️</div>
     <h3>Delete this note?</h3>
     <p>This action cannot be undone. The note will be permanently removed.</p>
     <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('deleteOverlay')">Cancel</button>
-      <button class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+      <button class="btn btn-ghost"   onclick="closeModal('deleteOverlay')">Cancel</button>
+      <button class="btn btn-danger"  onclick="confirmDelete()">Delete</button>
     </div>
   </div>
 </div>
 
-<!-- ─── TOAST ─── -->
+<!-- TOAST -->
 <div id="toast"></div>
 
+<!-- ═══════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════ -->
 <script>
-// ─── INSTALL APP ───
-let deferredPrompt;
-const installBtn = document.getElementById('installBtn');
+/* ── PWA install prompt ── */
+let deferredPrompt = null;
 
-window.addEventListener('beforeinstallprompt', (e) => {
+window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   deferredPrompt = e;
-
-  installBtn.style.display = 'inline-flex';
+  document.getElementById('splashInstallBtn').style.display  = 'inline-block';
+  document.getElementById('headerInstallBtn').style.display  = 'inline-flex';
 });
 
-installBtn.addEventListener('click', async () => {
+function triggerInstall() {
   if (!deferredPrompt) return;
-
   deferredPrompt.prompt();
-
-  const { outcome } = await deferredPrompt.userChoice;
-
-  if (outcome === 'accepted') {
-    installBtn.style.display = 'none';
-  }
-
-  deferredPrompt = null;
-});
-
-// ─── REGISTER SERVICE WORKER ───
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js');
+  deferredPrompt.userChoice.then(({ outcome }) => {
+    if (outcome === 'accepted') {
+      document.getElementById('splashInstallBtn').style.display = 'none';
+      document.getElementById('headerInstallBtn').style.display = 'none';
+    }
+    deferredPrompt = null;
   });
 }
 
-// ─── STATE ───
-let notes = JSON.parse(localStorage.getItem('examvault_notes') || '[]');
-let subjects = JSON.parse(localStorage.getItem('examvault_subjects') || '["Mathematics","Science","English","History","Physics","Chemistry"]');
-let editingId = null;
-let deletingId = null;
-let viewingId = null;
-let isPinned = false;
-let currentFilter = 'all';
+/* ── Service worker ── */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+  });
+}
+
+/* ── Splash ── */
+function enterApp() {
+  const splash = document.getElementById('installSplash');
+  const app    = document.getElementById('appWrapper');
+  splash.classList.add('hidden');
+  app.classList.add('visible');
+  setTimeout(() => { splash.style.display = 'none'; }, 550);
+}
+
+// Skip splash if already installed (standalone mode)
+if (
+  window.matchMedia('(display-mode: standalone)').matches ||
+  window.navigator.standalone === true
+) {
+  document.getElementById('installSplash').style.display = 'none';
+  document.getElementById('appWrapper').classList.add('visible');
+}
+
+/* ── State ── */
+let notes               = JSON.parse(localStorage.getItem('examvault_notes')    || '[]');
+let subjects            = JSON.parse(localStorage.getItem('examvault_subjects') || '["Mathematics","Science","English","History","Physics","Chemistry"]');
+let editingId           = null;
+let deletingId          = null;
+let viewingId           = null;
+let isPinned            = false;
+let currentFilter       = 'all';
 let activeSubjectFilter = null;
 
-// ─── INIT ───
+/* ── Persist ── */
+function persist() {
+  localStorage.setItem('examvault_notes',    JSON.stringify(notes));
+  localStorage.setItem('examvault_subjects', JSON.stringify(subjects));
+}
+
+/* ── Init ── */
 function init() {
   populateSubjectSelect();
   renderSubjectFilters();
   renderNotes();
-  updateStats();
-
-  document.getElementById('searchInput')
-    .addEventListener('input', renderNotes);
+  document.getElementById('searchInput').addEventListener('input', renderNotes);
 }
 
-// ─── SAVE ───
-function save() {
-  localStorage.setItem('examvault_notes', JSON.stringify(notes));
-  localStorage.setItem('examvault_subjects', JSON.stringify(subjects));
-}
-
-// ─── SUBJECTS ───
+/* ── Subject helpers ── */
 function populateSubjectSelect() {
   const sel = document.getElementById('subjectSelect');
   const cur = sel.value;
-
   sel.innerHTML = '<option value="">— Select a subject —</option>';
-
   subjects.forEach(s => {
-    const opt = document.createElement('option');
-    opt.value = s;
-    opt.textContent = s;
-
-    if (s === cur) opt.selected = true;
-
-    sel.appendChild(opt);
+    const o = document.createElement('option');
+    o.value = s; o.textContent = s;
+    if (s === cur) o.selected = true;
+    sel.appendChild(o);
   });
 }
 
 function renderSubjectFilters() {
   const wrap = document.getElementById('subjectFilter');
-
   wrap.innerHTML = '';
-
   subjects.forEach(s => {
     const btn = document.createElement('button');
-
-    btn.className = 'chip' + (activeSubjectFilter === s ? ' active' : '');
-
+    btn.className  = 'chip' + (activeSubjectFilter === s ? ' active' : '');
     btn.textContent = s;
-
     btn.onclick = () => {
-
       if (activeSubjectFilter === s) {
-
         activeSubjectFilter = null;
-
-        setFilter(
-          currentFilter === 'pinned' ? 'pinned' : 'all',
-          document.querySelector(
-            '.chip[data-filter="' +
-            (currentFilter === 'pinned' ? 'pinned' : 'all') +
-            '"]'
-          )
-        );
-
+        const f = currentFilter === 'pinned' ? 'pinned' : 'all';
+        setFilter(f, document.querySelector(`.chip[data-filter="${f}"]`));
       } else {
-
         activeSubjectFilter = s;
-
-        // REMOVE ACTIVE FROM ALL
-        document.querySelectorAll('.chip')
-          .forEach(c => c.classList.remove('active'));
-
-        // ADD ACTIVE ONLY TO CLICKED
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
         btn.classList.add('active');
-
         renderNotes();
       }
     };
-
     wrap.appendChild(btn);
   });
 }
 
-// ─── FILTER ───
-function setFilter(f, el) {
+function toggleNewSubject() {
+  const grp = document.getElementById('newSubjectGroup');
+  const show = grp.style.display === 'none';
+  grp.style.display = show ? 'block' : 'none';
+  if (show) document.getElementById('newSubjectInput').focus();
+}
 
+function addSubject() {
+  const inp = document.getElementById('newSubjectInput');
+  const val = inp.value.trim();
+  if (!val)                  { showToast('⚠️ Enter a subject name');    return; }
+  if (subjects.includes(val)) { showToast('⚠️ Subject already exists'); return; }
+  subjects.push(val);
+  persist();
+  populateSubjectSelect();
+  renderSubjectFilters();
+  document.getElementById('subjectSelect').value = val;
+  inp.value = '';
+  document.getElementById('newSubjectGroup').style.display = 'none';
+  showToast('📚 Subject added');
+}
+
+/* ── Filter ── */
+function setFilter(f, el) {
   currentFilter = f;
   activeSubjectFilter = null;
-
-  document.querySelectorAll('.chip')
-    .forEach(c => c.classList.remove('active'));
-
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
   if (el) el.classList.add('active');
-
   renderNotes();
 }
 
-// ─── RENDER NOTES ───
+/* ── Render ── */
 function renderNotes() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
 
-  const query = document.getElementById('searchInput')
-    .value
-    .toLowerCase();
-
-  let filtered = notes.filter(n => {
-
-    const matchSearch =
-      !query ||
-      n.title.toLowerCase().includes(query) ||
-      n.body.toLowerCase().includes(query) ||
-      n.subject.toLowerCase().includes(query);
-
-    const matchPin =
-      currentFilter !== 'pinned' || n.pinned;
-
-    const matchSubject =
-      !activeSubjectFilter || n.subject === activeSubjectFilter;
-
+  const filtered = notes.filter(n => {
+    const matchSearch   = !q || n.title.toLowerCase().includes(q) || n.body.toLowerCase().includes(q) || (n.subject||'').toLowerCase().includes(q);
+    const matchPin      = currentFilter !== 'pinned' || n.pinned;
+    const matchSubject  = !activeSubjectFilter || n.subject === activeSubjectFilter;
     return matchSearch && matchPin && matchSubject;
   });
 
-  const pinned = filtered.filter(n => n.pinned);
-
+  const pinned  = filtered.filter(n =>  n.pinned);
   const regular = filtered.filter(n => !n.pinned);
 
-  const pinnedSection = document.getElementById('pinnedSection');
-
-  pinnedSection.style.display =
-    (pinned.length && currentFilter !== 'pinned')
-      ? 'block'
-      : 'none';
-
-  document.getElementById('pinnedGrid').innerHTML =
-    pinned.map(noteCard).join('');
-
-  document.getElementById('notesGrid').innerHTML =
-    regular.length
-      ? regular.map(noteCard).join('')
-      : `
-      <div class="empty-state">
+  const sec = document.getElementById('pinnedSection');
+  sec.style.display = (pinned.length && currentFilter !== 'pinned') ? 'block' : 'none';
+  document.getElementById('pinnedGrid').innerHTML = pinned.map(buildCard).join('');
+  document.getElementById('notesGrid').innerHTML  = regular.length
+    ? regular.map(buildCard).join('')
+    : `<div class="empty-state">
         <div class="emoji">📝</div>
         <h3>No notes found</h3>
-        <p>Create your first note.</p>
-      </div>
-    `;
+        <p>${notes.length === 0 ? 'Tap <strong>New Note</strong> to get started.' : 'Try a different search or filter.'}</p>
+       </div>`;
 
-  updateStats();
+  // stats
+  document.getElementById('totalCount').textContent   = notes.length;
+  document.getElementById('pinnedCount').textContent  = notes.filter(n => n.pinned).length;
+  document.getElementById('subjectCount').textContent = subjects.length;
 }
 
-// ─── NOTE CARD ───
-function noteCard(n) {
-
-  const date = new Date(n.updatedAt)
-    .toLocaleDateString('en-US', {
-      month:'short',
-      day:'numeric',
-      year:'numeric'
-    });
-
+function buildCard(n) {
+  const date = new Date(n.updatedAt).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
   return `
-  <div class="note-card ${n.pinned ? 'pinned' : ''}">
-    ${n.pinned ? '<div class="pin-badge">📌 Pinned</div>' : ''}
-
-    <div class="card-subject">
-      <span class="subject-dot"></span>
-      ${escHtml(n.subject || 'General')}
-    </div>
-
-    <div class="card-title">
-      ${escHtml(n.title)}
-    </div>
-
-    <div class="card-body">
-      ${escHtml(n.body)}
-    </div>
-
-    <div class="card-footer">
-
-      <div class="card-date">${date}</div>
-
-      <div class="card-actions">
-
-        <button class="icon-btn"
-          onclick="viewNote('${n.id}')">
-          👁️
-        </button>
-
-        <button class="icon-btn ${n.pinned ? 'pin-active' : ''}"
-          onclick="togglePinNote('${n.id}')">
-          📌
-        </button>
-
-        <button class="icon-btn"
-          onclick="openEdit('${n.id}')">
-          ✏️
-        </button>
-
-        <button class="icon-btn del-btn"
-          onclick="deleteNote('${n.id}')">
-          🗑️
-        </button>
-
+    <div class="note-card ${n.pinned ? 'pinned' : ''}">
+      ${n.pinned ? '<div class="pin-badge">📌 Pinned</div>' : ''}
+      <div class="card-subject"><span class="subject-dot"></span>${esc(n.subject||'General')}</div>
+      <div class="card-title">${esc(n.title)}</div>
+      <div class="card-body">${esc(n.body)}</div>
+      <div class="card-footer">
+        <div class="card-date">${date}</div>
+        <div class="card-actions">
+          <button class="icon-btn" title="View"   onclick="viewNote('${n.id}')">👁️</button>
+          <button class="icon-btn pin-btn ${n.pinned ? 'pin-active' : ''}" title="${n.pinned?'Unpin':'Pin'}" onclick="togglePinNote('${n.id}')">📌</button>
+          <button class="icon-btn" title="Edit"   onclick="openEdit('${n.id}')">✏️</button>
+          <button class="icon-btn del-btn" title="Delete" onclick="deleteNote('${n.id}')">🗑️</button>
+        </div>
       </div>
-
-    </div>
-  </div>
-  `;
+    </div>`;
 }
 
-// ─── ESCAPE HTML ───
-function escHtml(s) {
-  return (s || '')
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
+function esc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ─── STATS ───
-function updateStats() {
-  document.getElementById('totalCount').textContent = notes.length;
-
-  document.getElementById('pinnedCount').textContent =
-    notes.filter(n => n.pinned).length;
-
-  document.getElementById('subjectCount').textContent =
-    subjects.length;
+/* ── CREATE ── */
+function openCreate() {
+  editingId = null;
+  isPinned  = false;
+  document.getElementById('modalTitle').textContent       = 'New Note';
+  document.getElementById('noteTitle').value              = '';
+  document.getElementById('noteBody').value               = '';
+  document.getElementById('newSubjectGroup').style.display = 'none';
+  document.getElementById('newSubjectInput').value        = '';
+  document.getElementById('pinToggle').classList.remove('pinned');
+  populateSubjectSelect();
+  document.getElementById('subjectSelect').value = '';
+  openModal('editOverlay');
 }
 
+/* ── EDIT ── */
+function openEdit(id) {
+  const note = notes.find(n => n.id === id);
+  if (!note) return;
+  editingId = id;
+  isPinned  = !!note.pinned;
+  document.getElementById('modalTitle').textContent       = 'Edit Note';
+  document.getElementById('noteTitle').value              = note.title;
+  document.getElementById('noteBody').value               = note.body;
+  document.getElementById('newSubjectGroup').style.display = 'none';
+  document.getElementById('newSubjectInput').value        = '';
+  document.getElementById('pinToggle').classList.toggle('pinned', isPinned);
+  populateSubjectSelect();
+  document.getElementById('subjectSelect').value = note.subject || '';
+  closeModal('viewOverlay');
+  openModal('editOverlay');
+}
+
+function editFromView() {
+  if (viewingId) openEdit(viewingId);
+}
+
+/* ── SAVE (create + update) ── */
+function saveNote() {
+  const title   = document.getElementById('noteTitle').value.trim();
+  const body    = document.getElementById('noteBody').value.trim();
+  const subject = document.getElementById('subjectSelect').value;
+
+  if (!title)   { showToast('⚠️ Please enter a title');    return; }
+  if (!subject) { showToast('⚠️ Please select a subject'); return; }
+
+  const now = new Date().toISOString();
+
+  if (editingId) {
+    const idx = notes.findIndex(n => n.id === editingId);
+    if (idx === -1) { showToast('❌ Note not found'); return; }
+    notes[idx] = { ...notes[idx], title, body, subject, pinned: isPinned, updatedAt: now };
+    showToast('✅ Note updated');
+  } else {
+    const id = (typeof crypto !== 'undefined' && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : Date.now().toString(36) + Math.random().toString(36).slice(2);
+    notes.unshift({ id, title, body, subject, pinned: isPinned, createdAt: now, updatedAt: now });
+    showToast('✅ Note created');
+  }
+
+  persist();
+  closeModal('editOverlay');
+  renderNotes();
+}
+
+/* ── VIEW ── */
+function viewNote(id) {
+  const note = notes.find(n => n.id === id);
+  if (!note) return;
+  viewingId = id;
+  document.getElementById('viewSubject').textContent = note.subject || 'General';
+  document.getElementById('viewTitle').textContent   = note.title;
+  document.getElementById('viewBody').textContent    = note.body;
+  document.getElementById('viewDate').textContent    =
+    'Last updated ' + new Date(note.updatedAt).toLocaleString('en-US', { month:'long', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' });
+  openModal('viewOverlay');
+}
+
+/* ── PIN (from card) ── */
+function togglePinNote(id) {
+  const idx = notes.findIndex(n => n.id === id);
+  if (idx === -1) return;
+  notes[idx].pinned    = !notes[idx].pinned;
+  notes[idx].updatedAt = new Date().toISOString();
+  persist();
+  renderNotes();
+  showToast(notes[idx].pinned ? '📌 Note pinned' : '📌 Note unpinned');
+}
+
+/* ── PIN (in form) ── */
+function togglePin() {
+  isPinned = !isPinned;
+  document.getElementById('pinToggle').classList.toggle('pinned', isPinned);
+}
+
+/* ── DELETE ── */
+function deleteNote(id) {
+  deletingId = id;
+  openModal('deleteOverlay');
+}
+
+function confirmDelete() {
+  if (!deletingId) return;
+  notes      = notes.filter(n => n.id !== deletingId);
+  deletingId = null;
+  persist();
+  closeModal('deleteOverlay');
+  closeModal('viewOverlay');
+  renderNotes();
+  showToast('🗑️ Note deleted');
+}
+
+/* ── Modal helpers ── */
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// Close on backdrop click
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) closeModal(el.id); });
+});
+
+// Close on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') ['editOverlay','viewOverlay','deleteOverlay'].forEach(closeModal);
+});
+
+/* ── Toast ── */
+let _toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+/* ── Boot ── */
 init();
 </script>
-
 </body>
 </html>
